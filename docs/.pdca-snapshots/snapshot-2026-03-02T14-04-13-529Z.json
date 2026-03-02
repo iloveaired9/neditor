@@ -1,0 +1,19 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-03-01T08:56:46.003Z",
+  "activeFeatures": [],
+  "primaryFeature": null,
+  "features": {},
+  "pipeline": {
+    "currentPhase": 1,
+    "level": "Starter",
+    "phaseHistory": []
+  },
+  "session": {
+    "startedAt": "2026-03-01T08:56:58.859Z",
+    "onboardingCompleted": false,
+    "lastActivity": "2026-03-01T08:56:58.859Z"
+  },
+  "_snapshotTimestamp": "2026-03-02T14:04:13.529Z",
+  "_reason": "pre-compress"
+}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Web Editor</title>
+    <!-- Font Awesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?t=20260301-1900">
+</head>
+<body>
+    <div class="container">
+        <h1>Modern Web Editor</h1>
+
+        <div class="editor-container">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <button data-command="bold" title="Bold"><i class="fas fa-bold"></i></button>
+                    <button data-command="italic" title="Italic"><i class="fas fa-italic"></i></button>
+                    <button data-command="underline" title="Underline"><i class="fas fa-underline"></i></button>
+                    <button data-command="strikeThrough" title="Strikethrough"><i class="fas fa-strikethrough"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <button data-command="justifyLeft" title="Align Left"><i class="fas fa-align-left"></i></button>
+                    <button data-command="justifyCenter" title="Align Center"><i class="fas fa-align-center"></i></button>
+                    <button data-command="justifyRight" title="Align Right"><i class="fas fa-align-right"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <button data-command="insertUnorderedList" title="Unordered List"><i class="fas fa-list-ul"></i></button>
+                    <button data-command="insertOrderedList" title="Ordered List"><i class="fas fa-list-ol"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <select id="fontSize" title="Font Size">
+                        <option value="">Size</option>
+                        <option value="1">S</option>
+                        <option value="3">M</option>
+                        <option value="5">L</option>
+                        <option value="7">XL</option>
+                    </select>
+                    <div class="color-picker-wrapper">
+                        <i class="fas fa-font"></i>
+                        <input type="color" id="foreColor" title="Text Color" value="#333333">
+                    </div>
+                </div>
+
+                <div class="toolbar-group">
+                    <button id="undo" title="Undo"><i class="fas fa-rotate-left"></i></button>
+                    <button id="redo" title="Redo"><i class="fas fa-rotate-right"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <button id="insertImage" title="Insert Image"><i class="fas fa-image"></i></button>
+                    <div class="table-picker-container">
+                        <button id="insertTable" title="Insert Table"><i class="fas fa-table"></i></button>
+                        <div id="tablePicker" class="table-picker">
+                            <div class="table-picker-grid" id="tableGrid"></div>
+                            <div class="table-picker-status" id="tableStatus">0 x 0</div>
+                        </div>
+                    </div>
+                    <button id="insertScrap" title="Scrap Link"><i class="fas fa-link"></i></button>
+                    <button id="insertYoutube" title="Insert YouTube Video"><i class="fab fa-youtube"></i></button>
+                    <div class="ai-dropdown-container">
+                        <button id="aiEditBtn" title="AI Editing"><i class="fas fa-wand-magic-sparkles"></i></button>
+                        <div id="aiMenu" class="ai-menu">
+                            <button data-ai="summarize">Summarize</button>
+                            <button data-ai="fix">Fix Grammar</button>
+                            <button data-ai="professional">Professional Tone</button>
+                            <button data-ai="casual">Casual Tone</button>
+                        </div>
+                    </div>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+
+            <!-- Tabs Interface -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="editor">
+                    <i class="fas fa-pen-to-square"></i> Editor
+                </button>
+                <button class="tab-btn" data-tab="source">
+                    <i class="fas fa-code"></i> Source
+                </button>
+            </div>
+
+            <!-- Tab Content: Editor -->
+            <div id="editor-view" class="tab-content active">
+                <div id="editor" class="editor-area" contenteditable="true" placeholder="이곳을 클릭하여 편집을 시작하세요..."></div>
+            </div>
+
+            <!-- Tab Content: Source -->
+            <div id="source-view" class="tab-content">
+                <textarea id="sourceArea" class="source-area" placeholder="HTML 코드가 이곳에 표시됩니다."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?t=20260301-1900"></script>
+</body>
+</html>
