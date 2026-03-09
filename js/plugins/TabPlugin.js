@@ -46,7 +46,10 @@ export class TabPlugin {
     }
 
     _togglePlugins(disabled) {
-        Object.values(this.editor.plugins).forEach(plugin => {
+        Object.keys(this.editor.plugins).forEach(name => {
+            if (name === 'tabs') return; // Skip self to allow switching back
+
+            const plugin = this.editor.plugins[name];
             if (typeof plugin.disable === 'function') {
                 const shouldActuallyDisable = disabled || (plugin.enabled === false);
                 plugin.disable(shouldActuallyDisable);

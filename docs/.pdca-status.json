@@ -1,17 +1,38 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-01T08:56:46.003Z",
+  "lastUpdated": "2026-03-09T04:51:43.756Z",
   "activeFeatures": [],
   "primaryFeature": null,
-  "features": {},
+  "features": {
+    "web-editor": {
+      "phase": "archived",
+      "matchRate": 95,
+      "iterationCount": 1,
+      "startedAt": "2026-03-01T00:00:00Z",
+      "completedAt": "2026-03-09T04:51:43.756Z",
+      "archivedAt": "2026-03-09T05:00:00Z",
+      "goalsAchieved": 10,
+      "goalsPlanned": 10,
+      "pluginCount": 9,
+      "reportPath": "docs/04-report/web-editor.report.md",
+      "archivedTo": "docs/archive/2026-03/web-editor/"
+    }
+  },
   "pipeline": {
     "currentPhase": 1,
     "level": "Starter",
-    "phaseHistory": []
+    "phaseHistory": [
+      {
+        "phase": 1,
+        "name": "Schema/Terminology",
+        "status": "completed",
+        "completedAt": "2026-03-01T00:00:00Z"
+      }
+    ]
   },
   "session": {
-    "startedAt": "2026-03-09T03:34:09.182Z",
+    "startedAt": "2026-03-09T04:51:43.756Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-03-09T03:34:09.182Z"
+    "lastActivity": "2026-03-09T04:51:43.756Z"
   }
 }
