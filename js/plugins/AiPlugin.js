@@ -1,0 +1,69 @@
+/**
+ * AiPlugin.js
+ */
+import { ApiMocks } from '../utils/ApiMocks.js';
+
+export class AiPlugin {
+    constructor(editor) {
+        this.editor = editor;
+        this.aiEditBtn = document.getElementById('aiEditBtn');
+        this.aiMenu = document.getElementById('aiMenu');
+        this.enabled = true;
+        this.showInToolbar = true;
+    }
+
+    init() {
+        if (!this.aiEditBtn || !this.aiMenu) return;
+
+        this.aiEditBtn.addEventListener('click', (e) => {
+            if (this.editor.isSourceMode || !this.enabled) return;
+            e.stopPropagation();
+            this.aiMenu.classList.toggle('active');
+        });
+
+        document.addEventListener('click', () => {
+            this.aiMenu.classList.remove('active');
+        });
+
+        this.aiMenu.querySelectorAll('button[data-ai]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const command = btn.dataset.ai;
+                this.aiMenu.classList.remove('active');
+
+                const selection = window.getSelection();
+                const selectedText = selection.toString().trim();
+
+                if (!selectedText) {
+                    alert('텍스트를 선택해 주세요.');
+                    return;
+                }
+
+                await this._processAi(command, selectedText, selection);
+            });
+        });
+    }
+
+    async _processAi(command, text, selection) {
+        const originalIcon = this.aiEditBtn.innerHTML;
+        this.aiEditBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        this.aiEditBtn.disabled = true;
+
+        try {
+            const resultText = await ApiMocks.processAiCommand(command, text);
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(resultText));
+            this.editor.emit('change');
+        } catch (err) {
+            console.error('AI processing failed:', err);
+        } finally {
+            this.aiEditBtn.innerHTML = originalIcon;
+            this.aiEditBtn.disabled = false;
+            this.editor.el.focus();
+        }
+    }
+
+    disable(disabled) {
+        if (this.aiEditBtn) this.aiEditBtn.disabled = disabled;
+    }
+}

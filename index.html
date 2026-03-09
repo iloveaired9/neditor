@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css?t=20260301-1900">
 </head>
+
 <body>
     <div class="container">
         <h1>Modern Web Editor</h1>
@@ -19,18 +21,22 @@
                     <button data-command="bold" title="Bold"><i class="fas fa-bold"></i></button>
                     <button data-command="italic" title="Italic"><i class="fas fa-italic"></i></button>
                     <button data-command="underline" title="Underline"><i class="fas fa-underline"></i></button>
-                    <button data-command="strikeThrough" title="Strikethrough"><i class="fas fa-strikethrough"></i></button>
+                    <button data-command="strikeThrough" title="Strikethrough"><i
+                            class="fas fa-strikethrough"></i></button>
                 </div>
 
                 <div class="toolbar-group">
                     <button data-command="justifyLeft" title="Align Left"><i class="fas fa-align-left"></i></button>
-                    <button data-command="justifyCenter" title="Align Center"><i class="fas fa-align-center"></i></button>
+                    <button data-command="justifyCenter" title="Align Center"><i
+                            class="fas fa-align-center"></i></button>
                     <button data-command="justifyRight" title="Align Right"><i class="fas fa-align-right"></i></button>
                 </div>
 
                 <div class="toolbar-group">
-                    <button data-command="insertUnorderedList" title="Unordered List"><i class="fas fa-list-ul"></i></button>
-                    <button data-command="insertOrderedList" title="Ordered List"><i class="fas fa-list-ol"></i></button>
+                    <button data-command="insertUnorderedList" title="Unordered List"><i
+                            class="fas fa-list-ul"></i></button>
+                    <button data-command="insertOrderedList" title="Ordered List"><i
+                            class="fas fa-list-ol"></i></button>
                 </div>
 
                 <div class="toolbar-group">
@@ -72,6 +78,7 @@
                             <button data-ai="casual">Casual Tone</button>
                         </div>
                     </div>
+                    <button id="settingsBtn" title="Developer Settings"><i class="fas fa-gear"></i></button>
                     <input type="file" id="imageInput" accept="image/*" style="display: none;">
                 </div>
             </div>
@@ -98,6 +105,8 @@
         </div>
     </div>
 
-    <script src="script.js?t=20260301-1900"></script>
+    <!-- Main Entry Point (as ES Module) -->
+    <script type="module" src="/script.js"></script>
 </body>
+
 </html>
