@@ -27,6 +27,20 @@ export class Neditor {
                 this.el.innerHTML = "";
             }
         });
+
+        // Handle paste to prevent tabs from creating new columns in tables
+        this.el.addEventListener('paste', (e) => {
+            // If another plugin already handled preventing default, skip
+            if (e.defaultPrevented) return;
+
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            if (text && text.includes('\t')) {
+                e.preventDefault();
+                // Replace tabs with 4 spaces to maintain some formatting but avoid column split
+                const cleanText = text.replace(/\t/g, '    ');
+                this.execCommand('insertText', cleanText);
+            }
+        });
     }
 
     registerPlugin(name, PluginClass) {
