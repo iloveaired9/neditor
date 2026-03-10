@@ -110,6 +110,73 @@
         </div>
     </div>
 
+    <!-- Image Upload Modal -->
+    <div id="imageUploadModal" class="image-modal">
+        <div class="image-modal-content">
+            <div class="image-modal-header">
+                <h3><i class="fas fa-desktop"></i> 내 PC 사진 넣기</h3>
+                <button class="close-image-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="image-modal-body">
+                <div class="image-upload-main">
+                    <div class="image-upload-controls">
+                        <button id="clearAllImages" class="btn-clear"><i class="fas fa-times"></i> 전체삭제</button>
+                        <button id="addImagesBtn" class="btn-add"><i class="fas fa-images"></i> 사진/동영상 추가</button>
+                        <span class="upload-hint">(사진을 점선 안으로 끌어 놓을 수 있습니다.)</span>
+                        <input type="file" id="modalImageInput" multiple accept="image/*" style="display: none;">
+                    </div>
+                    <div id="imageDropZone" class="image-drop-zone">
+                        <div id="imageGrid" class="image-grid">
+                            <!-- Thumbnails will be injected here -->
+                            <div class="empty-grid-msg">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>이미지를 여기에 드롭하거나 버튼을 눌러 추가하세요.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="image-upload-sidebar">
+                    <div class="sidebar-section">
+                        <h4>사진 정보</h4>
+                        <div id="photoInfo" class="sidebar-info">
+                            <p>가로: 0 세로: 0</p>
+                            <p>이름: 없음</p>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <h4>사진 정렬</h4>
+                        <div class="align-options">
+                            <label><input type="radio" name="imgAlign" value="left"><i
+                                    class="fas fa-align-left"></i></label>
+                            <label><input type="radio" name="imgAlign" value="center" checked><i
+                                    class="fas fa-align-center"></i></label>
+                            <label><input type="radio" name="imgAlign" value="right"><i
+                                    class="fas fa-align-right"></i></label>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <label class="check-option"><input type="checkbox" id="onePerRow" checked> 한줄에 한 장씩 넣기</label>
+                        <label class="check-option"><input type="checkbox" id="addMargin" checked> 사진 여백 넣기</label>
+                    </div>
+                    <div class="sidebar-section">
+                        <h4>크기 줄이기</h4>
+                        <select id="resizeWidth">
+                            <option value="original">원본 크기</option>
+                            <option value="1200">1200px</option>
+                            <option value="1000">1000px</option>
+                            <option value="800" selected>800px</option>
+                            <option value="600">600px</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="image-modal-footer">
+                <button id="confirmImageUpload" class="btn-confirm">확인</button>
+                <button id="cancelImageUpload" class="btn-cancel">취소</button>
+            </div>
+        </div>
+    </div>
+
     <div id="tableToolbar" class="table-toolbar">
         <button id="addRowBtn" title="행 추가"><i class="fas fa-plus"></i> 행</button>
         <button id="delRowBtn" title="행 삭제"><i class="fas fa-minus"></i> 행</button>

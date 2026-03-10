@@ -94,7 +94,9 @@ async def get_metadata(url: str):
     import re
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
     }
 
     try:
@@ -102,7 +104,19 @@ async def get_metadata(url: str):
             response = await client.get(url, headers=headers)
             response.raise_for_status()
             
-            soup = BeautifulSoup(response.text, "html.parser")
+            # Handle encoding - Ppomppu sometimes uses euc-kr
+            content = response.content
+            encoding = response.encoding
+            if "ppomppu.co.kr" in url:
+                # Try to detect encoding from meta tags if httpx guess is wrong
+                meta_encoding = re.search(rb'charset=["\']?([a-zA-Z0-9-]+)', content[:2000], re.I)
+                if meta_encoding:
+                    encoding = meta_encoding.group(1).decode('ascii')
+                else:
+                    encoding = 'euc-kr' # Common fallback for Ppomppu
+            
+            html_content = content.decode(encoding, errors='replace')
+            soup = BeautifulSoup(html_content, "html.parser")
             
             # Helper to get meta tags
             def get_meta(property_name=None, name=None):
@@ -113,31 +127,83 @@ async def get_metadata(url: str):
                     tag = soup.find("meta", attrs={"name": name})
                 return tag.get("content") if tag else None
 
-            title = get_meta("title") or soup.title.string if soup.title else None
-            description = get_meta("description") or get_meta(name="description")
-            image = get_meta("image")
-            site_name = get_meta("site_name")
+            title = None
+            description = None
+            image = None
+
+            # Site-specific logic for Ppomppu
+            if "ppomppu.co.kr" in url:
+                # Title
+                view_title = soup.select_one(".view_title2, .view_title, .title_name")
+                if view_title:
+                    title = view_title.get_text(strip=True)
+                
+                # Content/Description
+                content_div = soup.select_one(".board-contents, .view_content, #exec_content")
+                if content_div:
+                    description = content_div.get_text(separator=" ", strip=True)
+                    # Try to find a real image in the content
+                    first_img = content_div.find("img")
+                    if first_img and first_img.get("src"):
+                        img_src = first_img.get("src")
+                        if not img_src.startswith("http"):
+                            # Handle relative URLs if any (Ppomppu usually has absolute)
+                            if img_src.startswith("//"):
+                                img_src = "https:" + img_src
+                            else:
+                                from urllib.parse import urljoin
+                                img_src = urljoin(url, img_src)
+                        # Avoid small icons or emoticons
+                        if "emoticon" not in img_src and "icon" not in img_src:
+                            image = img_src
+
+            # Generic fallbacks
+            if not title:
+                title = get_meta("title") or (soup.title.string if soup.title else None)
             
-            # Fallback for title if it's too long or has extra stuff
+            if not description:
+                description = get_meta("description") or get_meta(name="description")
+            
+            if not image:
+                image = get_meta("image")
+                # If og:image is a generic site icon, and we haven't found a better one
+                if image and ("icon" in image.lower() or "app_2016" in image):
+                    # Try to find any large-ish image in the page
+                    for img in soup.find_all("img"):
+                        src = img.get("src", "")
+                        if src.startswith("http") and not any(x in src.lower() for x in ["icon", "emoticon", "banner", "ad"]):
+                            image = src
+                            break
+
+            # Clean up
             if title:
-                title = title.strip()
+                title = re.sub(r'\s*-\s*뽐뿌.*$', '', title.strip(), flags=re.I)
             
+            if description:
+                description = description.strip()
+                if len(description) > 200:
+                    description = description[:197] + "..."
+
             return {
                 "title": title or url,
                 "description": description or "",
                 "image": image or "",
-                "site_name": site_name or "",
+                "site_name": get_meta("site_name") or "뽐뿌",
                 "url": str(response.url)
             }
     except Exception as e:
         print(f"Error fetching metadata for {url}: {e}")
         return {
             "title": url,
-            "description": "Failed to fetch metadata",
+            "description": f"Failed to fetch metadata: {str(e)}",
             "image": "",
             "site_name": "",
             "url": url
         }
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 if __name__ == "__main__":
     import uvicorn

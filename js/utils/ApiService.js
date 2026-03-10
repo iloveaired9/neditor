@@ -3,7 +3,7 @@
  * Handles real API calls to the backend.
  */
 export const ApiService = {
-    BASE_URL: 'http://localhost:8000',
+    BASE_URL: '/api',
 
     /**
      * Upload an image file to the backend.

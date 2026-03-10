@@ -6,12 +6,15 @@ export class SettingsPlugin {
         this.editor = editor;
         this.settingsBtn = document.getElementById('settingsBtn');
         this.settingsModal = null;
+        this.backendStatus = 'checking';
+        this.backendCheckInterval = null;
     }
 
     init() {
         if (!this.settingsBtn) return;
 
         this._createModal();
+        this._startBackendCheck();
 
         this.settingsBtn.addEventListener('click', () => {
             this._toggleModal();
@@ -108,6 +111,22 @@ export class SettingsPlugin {
             });
         });
 
+        // Add backend status info
+        const liBackend = document.createElement('li');
+        liBackend.id = 'backend-status-item';
+        const isUp = this.backendStatus === 'up';
+        liBackend.innerHTML = `
+            <div class="plugin-info">
+                <span class="plugin-name">Backend Server</span>
+            </div>
+            <div class="plugin-actions">
+                <span class="plugin-status ${isUp ? 'active' : 'inactive'}" id="backend-status-text">
+                    ${isUp ? 'Running' : 'Offline'}
+                </span>
+            </div>
+        `;
+        list.appendChild(liBackend);
+
         // Add core info (Read-only)
         const liCore = document.createElement('li');
         liCore.innerHTML = `
@@ -117,6 +136,38 @@ export class SettingsPlugin {
             <div class="plugin-status active">Running</div>
         `;
         list.appendChild(liCore);
+    }
+
+    _startBackendCheck() {
+        const check = async () => {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                const resp = await fetch('/api/health', { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (resp.ok) {
+                    this.backendStatus = 'up';
+                } else {
+                    this.backendStatus = 'down';
+                }
+            } catch (err) {
+                this.backendStatus = 'down';
+            }
+            this._updateBackendUI();
+        };
+
+        check();
+        this.backendCheckInterval = setInterval(check, 5000);
+    }
+
+    _updateBackendUI() {
+        const statusText = document.getElementById('backend-status-text');
+        if (!statusText) return;
+
+        const isUp = this.backendStatus === 'up';
+        statusText.textContent = isUp ? 'Running' : 'Offline';
+        statusText.className = `plugin-status ${isUp ? 'active' : 'inactive'}`;
     }
 
     _togglePluginDetails(name) {
