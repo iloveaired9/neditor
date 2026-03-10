@@ -10,6 +10,8 @@ export class ScrapPlugin {
         this.insertScrapBtn = document.getElementById('insertScrap');
         this.enabled = true;
         this.showInToolbar = true;
+        this.confirmDelete = true;
+        this.showUrl = true; // New setting
     }
 
     init() {
@@ -38,7 +40,7 @@ export class ScrapPlugin {
     }
 
     async _createLinkScrap(url) {
-        const linkId = 'link-' + Date.now();
+        const linkId = 'link-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
         const initialHtml = `<a href="${url}" target="_blank" class="scrap_link_text" id="${linkId}">${url}</a>`;
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = initialHtml;
@@ -48,9 +50,16 @@ export class ScrapPlugin {
         this.editor.insertNode(fragment);
 
         try {
+            // Show loading state
+            const insertedLink = this.editor.el.querySelector(`#${linkId}`);
+            if (insertedLink) {
+                insertedLink.textContent = `${url}...`;
+                insertedLink.className = 'scrap-loading';
+            }
+
             // Using real ApiService
             const scrapData = await ApiService.fetchMetadata(url);
-            const insertedLink = this.editor.el.querySelector(`#${linkId}`);
+
             if (insertedLink) {
                 const scrapDiv = document.createElement('div');
                 scrapDiv.className = 'scrap_bx_container';
@@ -72,10 +81,10 @@ export class ScrapPlugin {
 
                 const delBtn = scrapDiv.querySelector('.scrap_del_btn');
                 delBtn.addEventListener('click', () => {
-                    if (confirm('삭제하시겠습니까?')) {
-                        const link = scrapDiv.nextElementSibling;
-                        if (link && link.classList.contains('scrap_link_text')) {
-                            link.remove();
+                    const shouldDelete = !this.confirmDelete || confirm('삭제하시겠습니까?');
+                    if (shouldDelete) {
+                        if (insertedLink && insertedLink.parentNode) {
+                            insertedLink.remove();
                         }
                         scrapDiv.remove();
                         this.editor.emit('change');
@@ -83,9 +92,17 @@ export class ScrapPlugin {
                 });
 
                 insertedLink.removeAttribute('id');
+                // Show or hide the original link text based on setting
+                insertedLink.style.display = this.showUrl ? 'block' : 'none';
             }
         } catch (error) {
             console.error('Scrap failed:', error);
+            const insertedLink = this.editor.el.querySelector(`#${linkId}`);
+            if (insertedLink) {
+                insertedLink.textContent = `[Failed to scrap] ${url}`;
+                insertedLink.className = 'scrap-error';
+            }
+            alert('링크 스크랩에 실패했습니다. 서버 상태나 URL을 확인해 주세요.');
         }
     }
 

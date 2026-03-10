@@ -11,10 +11,18 @@ export const EditorUtils = {
             const range = selection.getRangeAt(0);
             if (editor.contains(range.commonAncestorContainer)) {
                 range.deleteContents();
-                range.insertNode(node);
 
-                // Always insert a follow-up paragraph AFTER the inserted node for easier continuing text
-                node.parentNode.insertBefore(p, node.nextSibling);
+                if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+                    node.appendChild(p);
+                    range.insertNode(node);
+                } else {
+                    range.insertNode(node);
+                    if (node.parentNode) {
+                        node.parentNode.insertBefore(p, node.nextSibling);
+                    } else {
+                        editor.appendChild(p);
+                    }
+                }
             } else {
                 editor.appendChild(node);
                 editor.appendChild(p);

@@ -22,6 +22,30 @@ export class Neditor {
     init() {
         console.log('Neditor core initializing...');
         this.el.addEventListener('input', () => this.emit('change'));
+
+        // Handle pasting to prevent unintended table structure changes (Bug Fix)
+        this.el.addEventListener('paste', (e) => {
+            if (e.defaultPrevented) return;
+
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            const anchorNode = selection.anchorNode;
+            const isInTable = anchorNode && (anchorNode.nodeType === 3 ? anchorNode.parentElement : anchorNode).closest('table');
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+
+            if (!text) return;
+
+            // If text contains tabs, or if we are in a table and pasting multi-line text,
+            // we force plain text insertion to prevent the browser from creating new cells/rows.
+            if (text.includes('\t') || (isInTable && (text.includes('\n') || text.includes('\r')))) {
+                e.preventDefault();
+                // Replace tabs with 4 spaces
+                const cleanText = text.replace(/\t/g, '    ');
+                this.execCommand('insertText', cleanText);
+            }
+        });
+
         this.el.addEventListener('focus', () => {
             if (this.el.innerText.trim() === "" && this.el.querySelectorAll('img, table, .scrap_bx, .video-container').length === 0) {
                 this.el.innerHTML = "";

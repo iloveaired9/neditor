@@ -70,8 +70,8 @@ export class SettingsPlugin {
 
             const li = document.createElement('li');
             li.innerHTML = `
-                <div class="plugin-info">
-                    <span class="plugin-name">${name}</span>
+                <div class="plugin-info" style="cursor: pointer;" title="클릭하여 상세 설정 보기">
+                    <span class="plugin-name">${name} <i class="fas fa-chevron-right" style="font-size: 10px; margin-left: 5px; color: #94a3b8;"></i></span>
                 </div>
                 <div class="plugin-actions">
                     <div class="action-group">
@@ -89,8 +89,15 @@ export class SettingsPlugin {
                         </label>
                     </div>
                 </div>
+                <div class="plugin-details" id="details-${name}" style="display: none; width: 100%; margin-top: 10px; padding: 10px; background: #fff; border-top: 1px dashed #e2e8f0; border-radius: 4px;">
+                    <!-- Detail settings will be injected here -->
+                </div>
             `;
             list.appendChild(li);
+
+            li.querySelector('.plugin-info').addEventListener('click', () => {
+                this._togglePluginDetails(name);
+            });
 
             li.querySelector('.toggle-enable').addEventListener('change', (e) => {
                 this._togglePlugin(name, e.target.checked);
@@ -110,6 +117,75 @@ export class SettingsPlugin {
             <div class="plugin-status active">Running</div>
         `;
         list.appendChild(liCore);
+    }
+
+    _togglePluginDetails(name) {
+        const detailDiv = this.settingsModal.querySelector(`#details-${name}`);
+        if (!detailDiv) return;
+
+        const isVisible = detailDiv.style.display === 'block';
+
+        // Close all other details first
+        this.settingsModal.querySelectorAll('.plugin-details').forEach(el => el.style.display = 'none');
+        this.settingsModal.querySelectorAll('.plugin-info i').forEach(ia => ia.className = 'fas fa-chevron-right');
+
+        if (!isVisible) {
+            detailDiv.style.display = 'block';
+            this.settingsModal.querySelector(`.plugin-info i`).className = 'fas fa-chevron-down';
+            this._renderPluginDetails(name, detailDiv);
+        }
+    }
+
+    _renderPluginDetails(name, container) {
+        const plugin = this.editor.plugins[name];
+        container.innerHTML = '';
+
+        if (name === 'scrap') {
+            const rowDelete = document.createElement('div');
+            rowDelete.className = 'detail-row';
+            rowDelete.style.display = 'flex';
+            rowDelete.style.justifyContent = 'space-between';
+            rowDelete.style.alignItems = 'center';
+            rowDelete.style.marginBottom = '8px';
+            rowDelete.innerHTML = `
+                <span style="font-size: 12px; color: #475569;">삭제 시 확인 메시지 표시</span>
+                <label class="switch">
+                    <input type="checkbox" id="scrap-confirm-delete" ${plugin.confirmDelete ? 'checked' : ''}>
+                    <span class="slider"></span>
+                </label>
+            `;
+            container.appendChild(rowDelete);
+
+            rowDelete.querySelector('#scrap-confirm-delete').addEventListener('change', (e) => {
+                plugin.confirmDelete = e.target.checked;
+            });
+
+            const rowUrl = document.createElement('div');
+            rowUrl.className = 'detail-row';
+            rowUrl.style.display = 'flex';
+            rowUrl.style.justifyContent = 'space-between';
+            rowUrl.style.alignItems = 'center';
+            rowUrl.innerHTML = `
+                <span style="font-size: 12px; color: #475569;">스크랩 URL 표시</span>
+                <label class="switch">
+                    <input type="checkbox" id="scrap-show-url" ${plugin.showUrl ? 'checked' : ''}>
+                    <span class="slider"></span>
+                </label>
+            `;
+            container.appendChild(rowUrl);
+
+            rowUrl.querySelector('#scrap-show-url').addEventListener('change', (e) => {
+                plugin.showUrl = e.target.checked;
+                // Proactively update existing scrap links visibility if needed, 
+                // but usually this applies to new ones. 
+                // For a better UX, we could broadcast a change or find all .scrap_link_text
+                this.editor.el.querySelectorAll('.scrap_link_text').forEach(link => {
+                    link.style.display = plugin.showUrl ? 'block' : 'none';
+                });
+            });
+        } else {
+            container.innerHTML = `<span style="font-size: 11px; color: #94a3b8; font-style: italic;">상세 설정이 없습니다.</span>`;
+        }
     }
 
     _togglePlugin(name, enabled) {
