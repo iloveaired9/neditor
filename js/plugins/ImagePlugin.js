@@ -1,7 +1,7 @@
 /**
  * ImagePlugin.js
  */
-import { ApiMocks } from '../utils/ApiMocks.js';
+import { ApiService } from '../utils/ApiService.js';
 
 export class ImagePlugin {
     constructor(editor) {
@@ -27,6 +27,51 @@ export class ImagePlugin {
                 await this._handleUpload(file);
             }
         });
+
+        // Handle image capture (pasting from clipboard)
+        this.editor.el.addEventListener('paste', async (e) => {
+            if (!this.enabled || this.editor.isSourceMode) return;
+
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    e.preventDefault();
+                    const file = items[i].getAsFile();
+                    await this._handleUpload(file);
+                }
+            }
+        });
+
+        // Handle Drag and Drop
+        this.editor.el.addEventListener('dragover', (e) => {
+            if (!this.enabled || this.editor.isSourceMode) return;
+            e.preventDefault();
+            e.stopPropagation();
+            this.editor.el.classList.add('drag-active');
+        });
+
+        this.editor.el.addEventListener('dragleave', (e) => {
+            if (!this.enabled || this.editor.isSourceMode) return;
+            e.preventDefault();
+            e.stopPropagation();
+            this.editor.el.classList.remove('drag-active');
+        });
+
+        this.editor.el.addEventListener('drop', async (e) => {
+            if (!this.enabled || this.editor.isSourceMode) return;
+            e.preventDefault();
+            e.stopPropagation();
+            this.editor.el.classList.remove('drag-active');
+
+            const files = Array.from(e.dataTransfer.files);
+            if (files.length > 0) {
+                for (const file of files) {
+                    if (file.type.startsWith('image/')) {
+                        await this._handleUpload(file);
+                    }
+                }
+            }
+        });
     }
 
     async _handleUpload(file) {
@@ -35,13 +80,17 @@ export class ImagePlugin {
         this.insertImageBtn.disabled = true;
 
         try {
-            const mockUrl = await ApiMocks.simulateImageUpload(file);
-            this.editor.execCommand('insertImage', mockUrl);
+            // Using real ApiService instead of ApiMocks
+            const result = await ApiService.uploadImage(file);
+            const imageUrl = result.url;
 
+            this.editor.execCommand('insertImage', imageUrl);
+
+            // Clean up styling for the newly inserted image
             setTimeout(() => {
                 const images = this.editor.el.querySelectorAll('img');
                 images.forEach(img => {
-                    if (!img.style.maxWidth) {
+                    if (img.src === imageUrl && !img.style.maxWidth) {
                         img.style.maxWidth = '100%';
                         img.style.height = 'auto';
                         img.style.borderRadius = '12px';
@@ -54,6 +103,7 @@ export class ImagePlugin {
             }, 100);
         } catch (err) {
             console.error('Image upload failed:', err);
+            alert('이미지 업로드에 실패했습니다.');
         } finally {
             this.insertImageBtn.innerHTML = originalIcon;
             this.insertImageBtn.disabled = false;
@@ -63,5 +113,12 @@ export class ImagePlugin {
 
     disable(disabled) {
         if (this.insertImageBtn) this.insertImageBtn.disabled = disabled;
+    }
+
+    toggleVisibility(visible) {
+        this.showInToolbar = visible;
+        if (this.insertImageBtn) {
+            this.insertImageBtn.classList.toggle('hidden-toolbar', !visible);
+        }
     }
 }

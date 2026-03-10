@@ -102,7 +102,21 @@
             <div id="source-view" class="tab-content">
                 <textarea id="sourceArea" class="source-area" placeholder="HTML 코드가 이곳에 표시됩니다."></textarea>
             </div>
+
+            <!-- Bottom Attachment List -->
+            <div id="bottomAttachmentList" class="attachments-bottom-list">
+                <!-- Dynamically populated -->
+            </div>
         </div>
+    </div>
+
+    <div id="tableToolbar" class="table-toolbar">
+        <button id="addRowBtn" title="행 추가"><i class="fas fa-plus"></i> 행</button>
+        <button id="delRowBtn" title="행 삭제"><i class="fas fa-minus"></i> 행</button>
+        <button id="addColBtn" title="열 추가"><i class="fas fa-plus"></i> 열</button>
+        <button id="delColBtn" title="열 삭제"><i class="fas fa-minus"></i> 열</button>
+        <div class="toolbar-divider"></div>
+        <button id="delTableBtn" title="표 삭제" class="danger"><i class="fas fa-trash"></i> 삭제</button>
     </div>
 
     <!-- Main Entry Point (as ES Module) -->

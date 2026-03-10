@@ -1,7 +1,7 @@
 /**
  * AiPlugin.js
  */
-import { ApiMocks } from '../utils/ApiMocks.js';
+import { ApiService } from '../utils/ApiService.js';
 
 export class AiPlugin {
     constructor(editor) {
@@ -49,7 +49,8 @@ export class AiPlugin {
         this.aiEditBtn.disabled = true;
 
         try {
-            const resultText = await ApiMocks.processAiCommand(command, text);
+            // Using ApiService (currently still mock inside, but path is ready)
+            const resultText = await ApiService.processAiCommand(command, text);
             const range = selection.getRangeAt(0);
             range.deleteContents();
             range.insertNode(document.createTextNode(resultText));
@@ -65,5 +66,13 @@ export class AiPlugin {
 
     disable(disabled) {
         if (this.aiEditBtn) this.aiEditBtn.disabled = disabled;
+    }
+
+    toggleVisibility(visible) {
+        this.showInToolbar = visible;
+        const aiContainer = this.aiEditBtn ? this.aiEditBtn.closest('.ai-dropdown-container') : null;
+        if (aiContainer) {
+            aiContainer.classList.toggle('hidden-toolbar', !visible);
+        }
     }
 }

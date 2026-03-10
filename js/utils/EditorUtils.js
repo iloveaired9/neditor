@@ -11,14 +11,10 @@ export const EditorUtils = {
             const range = selection.getRangeAt(0);
             if (editor.contains(range.commonAncestorContainer)) {
                 range.deleteContents();
-                const lastChild = node.lastChild;
                 range.insertNode(node);
 
-                if (lastChild) {
-                    lastChild.parentNode.insertBefore(p, lastChild.nextSibling);
-                } else {
-                    editor.appendChild(p);
-                }
+                // Always insert a follow-up paragraph AFTER the inserted node for easier continuing text
+                node.parentNode.insertBefore(p, node.nextSibling);
             } else {
                 editor.appendChild(node);
                 editor.appendChild(p);

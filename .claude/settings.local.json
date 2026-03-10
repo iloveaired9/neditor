@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Skill(pdca)",
-      "Skill(pdca:*)"
+      "Skill(pdca:*)",
+      "Bash(git tag -a v1.0.0 -m \"Release v1.0.0: Neditor - Modular Web Editor:*)",
+      "Bash(git push origin v1.0.0)"
     ]
   }
 }

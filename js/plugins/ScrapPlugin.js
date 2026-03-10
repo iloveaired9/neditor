@@ -1,7 +1,7 @@
 /**
  * ScrapPlugin.js
  */
-import { ApiMocks } from '../utils/ApiMocks.js';
+import { ApiService } from '../utils/ApiService.js';
 import { EditorUtils } from '../utils/EditorUtils.js';
 
 export class ScrapPlugin {
@@ -23,11 +23,14 @@ export class ScrapPlugin {
         });
 
         this.editor.el.addEventListener('paste', async (e) => {
-            if (!this.enabled) return;
+            if (!this.enabled || this.editor.isSourceMode) return;
             const pastedText = (e.clipboardData || window.clipboardData).getData('text').trim();
             const urlRegex = /^(https?:\/\/[^\s]+)$/i;
 
             if (urlRegex.test(pastedText) && !EditorUtils.extractYoutubeId(pastedText)) {
+                // Check if it's just a plain URL, if so, we might want to prevent default and scrap
+                // But let's check if the user is intending to paste an image first (handled by ImagePlugin)
+                // For now, if it's a URL, we scrap it.
                 e.preventDefault();
                 await this._createLinkScrap(pastedText);
             }
@@ -45,7 +48,8 @@ export class ScrapPlugin {
         this.editor.insertNode(fragment);
 
         try {
-            const scrapData = await ApiMocks.fetchMockScrapData(url);
+            // Using real ApiService
+            const scrapData = await ApiService.fetchMetadata(url);
             const insertedLink = this.editor.el.querySelector(`#${linkId}`);
             if (insertedLink) {
                 const scrapDiv = document.createElement('div');
@@ -55,7 +59,7 @@ export class ScrapPlugin {
                     <div class="scrap_del_btn" title="삭제"><i class="fas fa-times"></i></div>
                     <a class="scrap_bx_href" href="${scrapData.url}" target="_blank">
                         <div class="scrap_bx">
-                            <span class="scrap_img" style="background-image: url(${scrapData.image});"></span>
+                            <span class="scrap_img" style="background-image: url(${scrapData.image || ''});"></span>
                             <ul>
                                 <li><strong>${scrapData.title}</strong></li>
                                 <li><small>${scrapData.description}</small></li>
@@ -87,5 +91,12 @@ export class ScrapPlugin {
 
     disable(disabled) {
         if (this.insertScrapBtn) this.insertScrapBtn.disabled = disabled;
+    }
+
+    toggleVisibility(visible) {
+        this.showInToolbar = visible;
+        if (this.insertScrapBtn) {
+            this.insertScrapBtn.classList.toggle('hidden-toolbar', !visible);
+        }
     }
 }
