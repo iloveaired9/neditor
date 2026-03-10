@@ -70,16 +70,35 @@ export class ImagePlugin {
             this._handleFiles(e.dataTransfer.files);
         });
 
-        // Continue supporting direct paste/drag to editor for convenience
+        // Direct paste to editor for immediate upload (Skip Modal)
         this.editor.el.addEventListener('paste', async (e) => {
             if (!this.enabled || this.editor.isSourceMode) return;
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            
+            let hasImage = false;
             for (let i = 0; i < items.length; i++) {
                 if (items[i].type.indexOf('image') !== -1) {
+                    hasImage = true;
                     e.preventDefault();
                     const file = items[i].getAsFile();
-                    this._showModal();
-                    this._handleFiles([file]);
+                    
+                    // Show a temporary placeholder or just upload
+                    try {
+                        // Use default settings for direct paste
+                        const result = await ApiService.uploadImage(file);
+                        const imageUrl = result.url;
+                        const imgHtml = this._buildImageHtml(imageUrl, {
+                            alignment: 'center',
+                            onePerRow: true,
+                            addMargin: true,
+                            resizeWidth: '800'
+                        });
+                        this.editor.execCommand('insertHTML', imgHtml);
+                        this.editor.emit('change');
+                    } catch (err) {
+                        console.error('Direct image paste upload failed:', err);
+                        alert('이미지 붙여넣기 업로드에 실패했습니다.');
+                    }
                 }
             }
         });

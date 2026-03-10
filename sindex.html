@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Web Editor</title>
+    <!-- Font Awesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?t=20260301-1900">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Modern Web Editor</h1>
+
+        <div class="editor-container">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <button data-command="bold" title="Bold"><i class="fas fa-bold"></i></button>
+                    <button data-command="italic" title="Italic"><i class="fas fa-italic"></i></button>
+                    <button data-command="underline" title="Underline"><i class="fas fa-underline"></i></button>
+                    <button data-command="strikeThrough" title="Strikethrough"><i
+                            class="fas fa-strikethrough"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <button data-command="justifyLeft" title="Align Left"><i class="fas fa-align-left"></i></button>
+                    <button data-command="justifyCenter" title="Align Center"><i
+                            class="fas fa-align-center"></i></button>
+                    <button data-command="justifyRight" title="Align Right"><i class="fas fa-align-right"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <button data-command="insertUnorderedList" title="Unordered List"><i
+                            class="fas fa-list-ul"></i></button>
+                    <button data-command="insertOrderedList" title="Ordered List"><i
+                            class="fas fa-list-ol"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <select id="fontSize" title="Font Size">
+                        <option value="">Size</option>
+                        <option value="1">S</option>
+                        <option value="3">M</option>
+                        <option value="5">L</option>
+                        <option value="7">XL</option>
+                    </select>
+                    <div class="color-picker-wrapper">
+                        <i class="fas fa-font"></i>
+                        <input type="color" id="foreColor" title="Text Color" value="#333333">
+                    </div>
+                </div>
+
+                <div class="toolbar-group">
+                    <button id="undo" title="Undo"><i class="fas fa-rotate-left"></i></button>
+                    <button id="redo" title="Redo"><i class="fas fa-rotate-right"></i></button>
+                </div>
+
+                <div class="toolbar-group">
+                    <button id="insertImage" title="Insert Image"><i class="fas fa-image"></i></button>
+                    <div class="table-picker-container">
+                        <button id="insertTable" title="Insert Table"><i class="fas fa-table"></i></button>
+                        <div id="tablePicker" class="table-picker">
+                            <div class="table-picker-grid" id="tableGrid"></div>
+                            <div class="table-picker-status" id="tableStatus">0 x 0</div>
+                        </div>
+                    </div>
+                    <button id="insertScrap" title="Scrap Link"><i class="fas fa-link"></i></button>
+                    <button id="insertYoutube" title="Insert YouTube Video"><i class="fab fa-youtube"></i></button>
+                    <div class="ai-dropdown-container">
+                        <button id="aiEditBtn" title="AI Editing"><i class="fas fa-wand-magic-sparkles"></i></button>
+                        <div id="aiMenu" class="ai-menu">
+                            <button data-ai="summarize">Summarize</button>
+                            <button data-ai="fix">Fix Grammar</button>
+                            <button data-ai="professional">Professional Tone</button>
+                            <button data-ai="casual">Casual Tone</button>
+                        </div>
+                    </div>
+                    <button id="settingsBtn" title="Developer Settings"><i class="fas fa-gear"></i></button>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+
+            <!-- Tabs Interface -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="editor">
+                    <i class="fas fa-pen-to-square"></i> Editor
+                </button>
+                <button class="tab-btn" data-tab="source">
+                    <i class="fas fa-code"></i> Source
+                </button>
+            </div>
+
+            <!-- Tab Content: Editor -->
+            <div id="editor-view" class="tab-content active">
+                <div id="editor" class="editor-area" contenteditable="true" placeholder="이곳을 클릭하여 편집을 시작하세요..."></div>
+            </div>
+
+            <!-- Tab Content: Source -->
+            <div id="source-view" class="tab-content">
+                <textarea id="sourceArea" class="source-area" placeholder="HTML 코드가 이곳에 표시됩니다."></textarea>
+            </div>
+
+            <!-- Bottom Attachment List -->
+            <div id="bottomAttachmentList" class="attachments-bottom-list">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Upload Modal -->
+    <div id="imageUploadModal" class="image-modal">
+        <div class="image-modal-content">
+            <div class="image-modal-header">
+                <h3><i class="fas fa-desktop"></i> 내 PC 사진 넣기</h3>
+                <button class="close-image-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="image-modal-body">
+                <div class="image-upload-main">
+                    <div class="image-upload-controls">
+                        <button id="clearAllImages" class="btn-clear"><i class="fas fa-times"></i> 전체삭제</button>
+                        <button id="addImagesBtn" class="btn-add"><i class="fas fa-images"></i> 사진/동영상 추가</button>
+                        <span class="upload-hint">(사진을 점선 안으로 끌어 놓을 수 있습니다.)</span>
+                        <input type="file" id="modalImageInput" multiple accept="image/*" style="display: none;">
+                    </div>
+                    <div id="imageDropZone" class="image-drop-zone">
+                        <div id="imageGrid" class="image-grid">
+                            <!-- Thumbnails will be injected here -->
+                            <div class="empty-grid-msg">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>이미지를 여기에 드롭하거나 버튼을 눌러 추가하세요.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="image-upload-sidebar">
+                    <div class="sidebar-section">
+                        <h4>사진 정보</h4>
+                        <div id="photoInfo" class="sidebar-info">
+                            <p>가로: 0 세로: 0</p>
+                            <p>이름: 없음</p>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <h4>사진 정렬</h4>
+                        <div class="align-options">
+                            <label><input type="radio" name="imgAlign" value="left"><i
+                                    class="fas fa-align-left"></i></label>
+                            <label><input type="radio" name="imgAlign" value="center" checked><i
+                                    class="fas fa-align-center"></i></label>
+                            <label><input type="radio" name="imgAlign" value="right"><i
+                                    class="fas fa-align-right"></i></label>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <label class="check-option"><input type="checkbox" id="onePerRow" checked> 한줄에 한 장씩 넣기</label>
+                        <label class="check-option"><input type="checkbox" id="addMargin" checked> 사진 여백 넣기</label>
+                    </div>
+                    <div class="sidebar-section">
+                        <h4>크기 줄이기</h4>
+                        <select id="resizeWidth">
+                            <option value="original">원본 크기</option>
+                            <option value="1200">1200px</option>
+                            <option value="1000">1000px</option>
+                            <option value="800" selected>800px</option>
+                            <option value="600">600px</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="image-modal-footer">
+                <button id="confirmImageUpload" class="btn-confirm">확인</button>
+                <button id="cancelImageUpload" class="btn-cancel">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tableToolbar" class="table-toolbar">
+        <button id="addRowBtn" title="행 추가"><i class="fas fa-plus"></i> 행</button>
+        <button id="delRowBtn" title="행 삭제"><i class="fas fa-minus"></i> 행</button>
+        <button id="addColBtn" title="열 추가"><i class="fas fa-plus"></i> 열</button>
+        <button id="delColBtn" title="열 삭제"><i class="fas fa-minus"></i> 열</button>
+        <div class="toolbar-divider"></div>
+        <button id="delTableBtn" title="표 삭제" class="danger"><i class="fas fa-trash"></i> 삭제</button>
+    </div>
+
+    <!-- Main Entry Point (as ES Module) -->
+    <script type="module" src="/script.js"></script>
+</body>
+
+</html>
