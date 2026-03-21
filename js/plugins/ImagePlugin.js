@@ -31,6 +31,7 @@ export class ImagePlugin {
         this.selectedFiles = [];
         this.enabled = true;
         this.showInToolbar = true;
+        this.defaultResizeWidth = '800';
     }
 
     init() {
@@ -91,7 +92,7 @@ export class ImagePlugin {
                             alignment: 'center',
                             onePerRow: true,
                             addMargin: true,
-                            resizeWidth: '800'
+                            resizeWidth: this.defaultResizeWidth
                         });
                         this.editor.execCommand('insertHTML', imgHtml);
                         this.editor.emit('change');
@@ -107,6 +108,7 @@ export class ImagePlugin {
     _showModal() {
         this.modal.classList.add('active');
         this.selectedFiles = [];
+        this.resizeSelect.value = this.defaultResizeWidth;
         this._renderGrid();
     }
 
@@ -174,11 +176,33 @@ export class ImagePlugin {
 
         const img = new Image();
         img.onload = () => {
-            this.photoInfo.innerHTML = `
-                <p>가로: ${img.width}px</p>
-                <p>세로: ${img.height}px</p>
-                <p style="word-break: break-all;">이름: ${file.name}</p>
+            const resizeWidth = this.resizeSelect.value;
+            let html = `
+                <p><strong>원본 크기:</strong></p>
+                <p>가로: ${img.width}px / 세로: ${img.height}px</p>
+                <p style="word-break: break-all;">파일: ${file.name}</p>
             `;
+
+            // 개발자 모드일 때 변환 정보 표시
+            if (this.editor.isDevMode) {
+                let convertedWidth = img.width;
+                let convertedHeight = img.height;
+
+                if (resizeWidth !== 'original') {
+                    const ratio = parseInt(resizeWidth) / img.width;
+                    convertedWidth = parseInt(resizeWidth);
+                    convertedHeight = Math.round(img.height * ratio);
+                }
+
+                html += `
+                    <hr style="margin: 12px 0; border: none; border-top: 1px dashed #e2e8f0;">
+                    <p><strong>변환 설정:</strong></p>
+                    <p>크기: ${resizeWidth === 'original' ? '원본' : resizeWidth + 'px'}</p>
+                    <p>변환 후: ${convertedWidth}x${convertedHeight}px</p>
+                `;
+            }
+
+            this.photoInfo.innerHTML = html;
         };
         img.src = dataUrl;
     }

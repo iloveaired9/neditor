@@ -54,6 +54,7 @@ export class SettingsPlugin {
 
     _toggleModal() {
         const isActive = this.settingsModal.classList.toggle('active');
+        this.editor.isDevMode = isActive;
         if (isActive) {
             this._refreshPluginList();
         }
@@ -191,7 +192,30 @@ export class SettingsPlugin {
         const plugin = this.editor.plugins[name];
         container.innerHTML = '';
 
-        if (name === 'scrap') {
+        if (name === 'image') {
+            const rowDefaultSize = document.createElement('div');
+            rowDefaultSize.className = 'detail-row';
+            rowDefaultSize.style.display = 'flex';
+            rowDefaultSize.style.justifyContent = 'space-between';
+            rowDefaultSize.style.alignItems = 'center';
+            rowDefaultSize.style.marginBottom = '8px';
+            rowDefaultSize.innerHTML = `
+                <span style="font-size: 12px; color: #475569;">기본 이미지 크기</span>
+                <select id="image-default-width" style="padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
+                    <option value="original" ${plugin.defaultResizeWidth === 'original' ? 'selected' : ''}>원본 크기</option>
+                    <option value="1200" ${plugin.defaultResizeWidth === '1200' ? 'selected' : ''}>1200px</option>
+                    <option value="1000" ${plugin.defaultResizeWidth === '1000' ? 'selected' : ''}>1000px</option>
+                    <option value="800" ${plugin.defaultResizeWidth === '800' ? 'selected' : ''}>800px</option>
+                    <option value="600" ${plugin.defaultResizeWidth === '600' ? 'selected' : ''}>600px</option>
+                </select>
+            `;
+            container.appendChild(rowDefaultSize);
+
+            rowDefaultSize.querySelector('#image-default-width').addEventListener('change', (e) => {
+                plugin.defaultResizeWidth = e.target.value;
+                plugin.resizeSelect.value = e.target.value;
+            });
+        } else if (name === 'scrap') {
             const rowDelete = document.createElement('div');
             rowDelete.className = 'detail-row';
             rowDelete.style.display = 'flex';
